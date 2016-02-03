@@ -35,8 +35,10 @@ class Prototypal
 
 		if ok
 			value
+		elsif @proto
+			@proto.__send__(method_sym, *arguments, &block)
 		else
-			Undefined.instance
+			Undefined.value
 		end
 	end
 
@@ -65,17 +67,12 @@ class Prototypal
 			[false, nil]
 		end
 	end
-
-#	def respond_to?(method_sym, include_private = false)
-#		p "respond_to?"
-#		true
-#	end
 end
 
 class Undefined
-	@@instance = Undefined.new
+	@@value = Undefined.new
 
-	def self.instance
-		@@instance
+	def self.value
+		@@value
 	end
 end

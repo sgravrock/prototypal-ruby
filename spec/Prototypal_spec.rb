@@ -11,12 +11,48 @@ describe Prototypal do
 		end
 
 		it "should return Undefined when an unset property is read" do
-			expect(@subject.foo).to be(Undefined.instance)
+			expect(@subject.foo).to be(Undefined.value)
 		end
 
 		it "should set and get its own properties" do
 			@subject.foo = 42;
 			expect(@subject.foo).to eql(42)
+		end
+	end
+
+	context "Objects with prototypes" do
+		before do
+			@root = Prototypal.new(nil)
+			@subject = @root.create_object
+		end
+
+		it "should have a prototype" do
+			expect(@subject.proto).to be(@root)
+		end
+
+		it "should set and get its own properties" do
+			@subject.foo = 42;
+			expect(@subject.foo).to eql(42)
+		end
+
+		it "should return Undefined when an unset property is read" do
+			expect(@subject.foo).to be(Undefined.value)
+		end
+
+		it "should get missing properties from the prototype" do
+			@root.foo = 17;
+			expect(@subject.foo).to eql(17)
+		end
+
+		it "should prefer own properties over the prototype" do
+			@root.foo = 17;
+			@subject.foo = 42;
+			expect(@subject.foo).to eql(42)
+		end
+
+		it "should set missing properties on self, not the prototype" do
+			@subject.foo = 17
+			expect(@root.foo).to be(Undefined.value)
 		end
 	end
 end
