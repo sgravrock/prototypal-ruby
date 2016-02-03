@@ -54,5 +54,25 @@ describe Prototypal do
 			@subject.foo = 17
 			expect(@root.foo).to be(Undefined.value)
 		end
+
+		it "responds to messages to get its own properties" do
+			@subject.foo = 17
+			expect(@subject.respond_to?(:foo)).to eql(true)
+		end
+
+		it "responds to messages to get its prototype's properties" do
+			@root.foo = 17
+			expect(@subject.respond_to?(:foo)).to eql(true)
+		end
+
+		it "does not respond to messages to get unset properties" do
+			expect(@subject.respond_to?(:foo)).to eql(false)
+		end
+
+		it "responds to all setters" do
+			@subject.foo = 17
+			expect(@subject.respond_to?(:foo=)).to eql(true)
+			expect(@subject.respond_to?(:bar=)).to eql(true)
+		end
 	end
 end

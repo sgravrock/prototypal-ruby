@@ -24,6 +24,24 @@ class Prototypal
 		result
 	end
 
+	def respond_to?(method_sym, include_private = false)
+		if super
+			true
+		elsif is_setter(method_sym)
+			true
+		else
+			ok, value = try_get(method_sym, [])
+
+			if ok
+				true
+			elsif @proto
+				@proto.respond_to?(method_sym, include_private)
+			else
+				false
+			end
+		end
+	end
+
 	private
 
 	def real_method_missing(method_sym, *arguments, &block)
@@ -42,10 +60,15 @@ class Prototypal
 		end
 	end
 
-	def try_set(method_sym, *arguments)
+	def is_setter(method_sym)
 		s = method_sym.inspect
+		s.start_with?(":") && s.end_with?("=")
+	end
 
-		if s.start_with?(":") && s.end_with?("=") && arguments.length == 1
+	def try_set(method_sym, *arguments)
+
+		if is_setter(method_sym) && arguments.length == 1
+			s = method_sym.inspect
 			key = s[1, s.length - 2]
 			@props[key] = arguments[0][0]
 			[true, arguments[0]]
