@@ -13,6 +13,10 @@ class Prototypal
 	end
 
 	def method_missing(method_sym, *arguments, &block)
+		delegate(self, method_sym, arguments)
+	end
+
+	def delegate(instance, method_sym, arguments)
 		ok, value = try_set(method_sym, arguments)
 		if ok
 			return value
@@ -20,11 +24,11 @@ class Prototypal
 
 		ok, value = try_get(method_sym, arguments)
 		if ok
-			return maybe_call(value, arguments)
+			return instance.maybe_call(value, arguments)
 		end
 
 		if @proto
-			@proto.__send__(method_sym, *arguments, &block)
+			@proto.delegate(instance, method_sym, arguments)
 		else
 			Undefined.value
 		end
@@ -34,9 +38,6 @@ class Prototypal
 		true
 	end
 
-
-	private
-
 	def maybe_call(value, arguments)
 		if value.respond_to?(:call)
 			instance_exec(*arguments, &value)
@@ -44,6 +45,10 @@ class Prototypal
 			value
 		end
 	end
+
+
+	private
+
 
 	def is_setter(method_sym)
 		s = method_sym.inspect

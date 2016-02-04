@@ -69,10 +69,10 @@ describe Prototypal do
 
 	describe "Calling 'methods'" do
 		before do
-			@subject = Prototypal.new(nil)
+			@subject = Prototypal.new(nil).create_object
 		end
 
-		describe "With no arguments" do
+		context "With no arguments" do
 			it "should call the lambda" do
 				called = false
 				@subject.foo = lambda { called = true }
@@ -81,7 +81,7 @@ describe Prototypal do
 			end
 		end
 
-		describe "With arguments" do
+		context "With arguments" do
 			it "should call the lambda with the arguments" do
 				v1 = nil
 				v2 = nil
@@ -92,6 +92,15 @@ describe Prototypal do
 				@subject.foo(4, 5)
 				expect(v1).to eql(4)
 				expect(v2).to eql(5)
+			end
+		end
+
+		context "That are defined on the prototype" do
+			it "should set self to the object the method was called on, not the prototype" do
+				instance = nil
+				@subject.proto.foo = lambda { instance = self }
+				@subject.foo
+				expect(instance).to be(@subject)
 			end
 		end
 
