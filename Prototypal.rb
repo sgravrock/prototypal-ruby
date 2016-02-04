@@ -31,21 +31,7 @@ class Prototypal
 	end
 
 	def respond_to?(method_sym, include_private = false)
-		if super
-			true
-		elsif is_setter(method_sym)
-			true
-		else
-			ok, value = try_get(method_sym, [])
-
-			if ok
-				true
-			elsif @proto
-				@proto.respond_to?(method_sym, include_private)
-			else
-				false
-			end
-		end
+		true
 	end
 
 
