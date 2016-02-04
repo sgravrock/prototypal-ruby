@@ -2,7 +2,6 @@ class Prototypal
 	def initialize(prototype)
 		@proto = prototype
 		@props = Hash.new
-		@in_method_missing = false
 	end
 
 	def create_object
@@ -14,14 +13,21 @@ class Prototypal
 	end
 
 	def method_missing(method_sym, *arguments, &block)
-		if @in_method_missing
-			raise "method_missing recursed!"
+		ok, value = try_set(method_sym, arguments)
+		if ok
+			return value
 		end
 
-		@in_method_missing = true
-		result = real_method_missing(method_sym, *arguments, &block)
-		@in_method_missing = false
-		result
+		ok, value = try_get(method_sym, arguments)
+		if ok
+			return maybe_call(value, arguments)
+		end
+
+		if @proto
+			@proto.__send__(method_sym, *arguments, &block)
+		else
+			Undefined.value
+		end
 	end
 
 	def respond_to?(method_sym, include_private = false)
@@ -42,25 +48,8 @@ class Prototypal
 		end
 	end
 
+
 	private
-
-	def real_method_missing(method_sym, *arguments, &block)
-		ok, value = try_set(method_sym, arguments)
-		if ok
-			return value
-		end
-
-		ok, value = try_get(method_sym, arguments)
-		if ok
-			return maybe_call(value, arguments)
-		end
-
-		if @proto
-			@proto.__send__(method_sym, *arguments, &block)
-		else
-			Undefined.value
-		end
-	end
 
 	def maybe_call(value, arguments)
 		if value.respond_to?(:call)

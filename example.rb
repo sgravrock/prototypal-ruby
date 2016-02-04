@@ -17,5 +17,5 @@ craig = ninja.create_object
 craig.name = "Craig"
 
 [alice, bob, craig].each do |p|
-	p.describe.call(p)
+	p.describe(p)
 end

@@ -106,6 +106,12 @@ describe Prototypal do
 			@subject.foo
 			expect(instance).to be(@subject)
 		end
+
+		it "should allow access to other object properties from the lambda" do
+			@subject.name = "Bob"
+			@subject.foo = lambda { self.name }
+			expect(@subject.foo).to eql("Bob")
+		end
 	end
 
 	describe "respond_to?" do
