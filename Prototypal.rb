@@ -46,17 +46,27 @@ class Prototypal
 
 	def real_method_missing(method_sym, *arguments, &block)
 		ok, value = try_set(method_sym, arguments)
-
-		if not ok
-			ok, value = try_get(method_sym, arguments)
+		if ok
+			return value
 		end
 
+		ok, value = try_get(method_sym, arguments)
 		if ok
-			value
-		elsif @proto
+			return maybe_call(value, arguments)
+		end
+
+		if @proto
 			@proto.__send__(method_sym, *arguments, &block)
 		else
 			Undefined.value
+		end
+	end
+
+	def maybe_call(value, arguments)
+		if value.respond_to?(:call)
+			instance_exec(*arguments, &value)
+		else
+			value
 		end
 	end
 
@@ -66,7 +76,6 @@ class Prototypal
 	end
 
 	def try_set(method_sym, *arguments)
-
 		if is_setter(method_sym) && arguments.length == 1
 			s = method_sym.inspect
 			key = s[1, s.length - 2]
@@ -78,14 +87,10 @@ class Prototypal
 	end
 
 	def try_get(method_sym, arguments)
-		if arguments.length == 0
-			s = method_sym.inspect
-			key = s[1, s.length - 1]
-			if @props.has_key?(key)
-				[true, @props[key]]
-			else
-				[false, nil]
-			end
+		s = method_sym.inspect
+		key = s[1, s.length - 1]
+		if @props.has_key?(key)
+			[true, @props[key]]
 		else
 			[false, nil]
 		end

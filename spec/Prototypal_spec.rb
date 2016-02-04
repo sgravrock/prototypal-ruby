@@ -67,6 +67,47 @@ describe Prototypal do
 		end
 	end
 
+	describe "Calling 'methods'" do
+		before do
+			@subject = Prototypal.new(nil)
+		end
+
+		describe "With no arguments" do
+			it "should call the lambda" do
+				called = false
+				@subject.foo = lambda { called = true }
+				@subject.foo
+				expect(called).to eql(true)
+			end
+		end
+
+		describe "With arguments" do
+			it "should call the lambda with the arguments" do
+				v1 = nil
+				v2 = nil
+				@subject.foo = lambda do |a, b|
+					v1 = a
+					v2 = b
+				end
+				@subject.foo(4, 5)
+				expect(v1).to eql(4)
+				expect(v2).to eql(5)
+			end
+		end
+
+		it "should return the value returned by the lambda" do
+			@subject.foo = lambda { "yo" }
+			expect(@subject.foo).to eql("yo")
+		end
+
+		it "should set self to the object the method was called on" do
+			instance = nil
+			@subject.foo = lambda { instance = self }
+			@subject.foo
+			expect(instance).to be(@subject)
+		end
+	end
+
 	describe "respond_to?" do
 		before do
 			@subject = Prototypal.new(nil).create_object
